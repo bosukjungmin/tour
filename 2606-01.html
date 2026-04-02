@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13인 맞춤 해외여행 제안서: 파타야, 몽골, 하노이</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 기본 폰트 및 쾌적한 스크롤 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; color: #334155; }
+
+        /* 탭 전환 애니메이션 */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Chart Container Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* 제한된 최대 너비 */
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh; /* 반응형 높이 */
+            max-height: 450px; /* 최대 높이 제한 */
+            min-height: 300px;
+        }
+        @media (max-width: 768px) {
+            .chart-container { height: 300px; }
+        }
+
+        /* 테이블 스크롤 바인딩 방지 */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    </style>
+
+    <!-- Chosen Palette: Slate & Blue/Teal Accents -->
+    <!-- Application Structure Plan:
+        This SPA acts as a digital, interactive version of the requested Excel workbook.
+        - The layout uses a prominent tab navigation mimicking Excel sheets: '총괄 비교' (Summary), '파타야', '몽골', '하노이'.
+        - '총괄 비교' provides a top-level dashboard with a Chart.js bar chart comparing estimated costs and a comparison matrix table to help the group make a quick decision based on their strict constraints (13 single rooms, pool, city center).
+        - Each destination tab drills down into the specifics: Flight details, Accommodation strategy (addressing the 13 single room/pool villa constraint), Travel Style comparison (Group vs. Free), and detailed cost breakdowns.
+        - This structure ensures the user can easily digest the complex variables of planning for 13 people requiring single rooms.
+    -->
+    <!-- Visualization & Content Choices:
+        - Goal: Compare overall costs easily. -> Viz: Grouped Bar Chart (Chart.js) showing Min and Max estimates per destination. Justification: Visualizing the price gap is crucial when multiplying by 13 people.
+        - Goal: Compare destination features against constraints. -> Viz: HTML Data Table. Justification: Best for side-by-side feature comparison (Flight time, City Center vibe, Pool availability).
+        - Goal: Present detailed destination info. -> Viz: Structured HTML grids and cards. Justification: Breaks down heavy text (Group vs Free travel, Hotel recommendations) into scannable chunks.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Chart.js used via CDN.
+    -->
+</head>
+<body class="antialiased selection:bg-blue-200 selection:text-blue-900">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Header -->
+        <header class="mb-8 text-center sm:text-left border-b pb-6 border-slate-200">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">✈️ 13인 맞춤 해외여행 기획안</h1>
+            <p class="text-slate-500 text-lg">일정: 6/9 ~ 6/13 (4박 5일) | 조건: 13인 1인 1실, 4성급 이상/수영장, 도심 인접, 직항</p>
+            <div class="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
+                <span class="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-medium">⚠️ 핵심 고려사항: 13인 '1인 1실'은 싱글차지(독숙비용) 발생으로 전체 예산이 크게 상승합니다.</span>
+            </div>
+        </header>
+
+        <!-- Navigation (Excel Sheets Analogue) -->
+        <nav class="flex flex-wrap border-b border-slate-300 mb-6" aria-label="Tabs">
+            <button onclick="switchTab('sheet1')" id="nav-sheet1" class="nav-btn w-1/2 sm:w-auto text-center py-3 px-6 border-b-2 font-medium text-sm focus:outline-none border-blue-500 text-blue-600 bg-blue-50">
+                📊 Sheet 1: 총괄 비교
+            </button>
+            <button onclick="switchTab('sheet2')" id="nav-sheet2" class="nav-btn w-1/2 sm:w-auto text-center py-3 px-6 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors">
+                🌴 Sheet 2: 파타야
+            </button>
+            <button onclick="switchTab('sheet3')" id="nav-sheet3" class="nav-btn w-1/2 sm:w-auto text-center py-3 px-6 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors">
+                🐎 Sheet 3: 몽골
+            </button>
+            <button onclick="switchTab('sheet4')" id="nav-sheet4" class="nav-btn w-1/2 sm:w-auto text-center py-3 px-6 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 focus:outline-none transition-colors">
+                🍜 Sheet 4: 하노이
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 min-h-[600px]">
+
+            <!-- ================= SHEET 1: 총괄 비교 ================= -->
+            <section id="sheet1" class="tab-content active">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">📊 목적지 총괄 비교</h2>
+                    <p class="text-slate-600">요청하신 3개 지역에 대해 고객님의 필수 조건(1인 1실, 도심, 수영장, 직항)을 바탕으로 분석한 종합 결과입니다. 13개의 개별 침실을 갖춘 도심 속 풀빌라는 현실적으로 예약이 불가하여, <b>대형 야외 수영장을 갖춘 도심 4성급 이상 호텔</b>을 기준으로 기획되었습니다.</p>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-8">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-4 text-center">💰 1인당 예상 경비 비교 (항공, 숙박, 기본경비 포함 / 단위: 만원)</h3>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-2">* 1인 1실 사용에 따른 싱글차지가 포함된 보수적인 예상 금액입니다.</p>
+                </div>
+
+                <!-- Comparison Table -->
+                <div class="table-wrapper rounded-lg shadow ring-1 ring-black ring-opacity-5">
+                    <table class="min-w-full divide-y divide-slate-300">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900">구분</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">🌴 파타야 (태국)</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">🐎 몽골 (울란바토르)</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">🍜 하노이 (베트남)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900">비행 (직항)</td>
+                                <td class="px-3 py-4 text-sm text-slate-600">방콕(BKK/DMK) 직항 후 차량 1.5~2시간 이동<br><span class="text-xs text-rose-500">* 파타야 공항 직항은 제한적</span></td>
+                                <td class="px-3 py-4 text-sm text-slate-600">울란바토르(UBN) 직항 (약 3.5시간)</td>
+                                <td class="px-3 py-4 text-sm text-slate-600">하노이(HAN) 직항 (약 4.5시간)</td>
+                            </tr>
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900">숙소조건 적합도<br>(도심+4성+수영장)</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>최상.</b> 도심(비치로드/터미널21 인근)에 수영장 좋은 4~5성급 대형 호텔 다수. 13객실 확보 용이.</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>하.</b> 도심 4성급 호텔은 있으나 수영장이 작거나 실내임. '몽골스러운' 게르 캠프는 수영장/도심 조건 불충족.</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>상.</b> 올드쿼터나 서호 주변 루프탑 수영장 등을 갖춘 4성급 부티크/대형 호텔 다수. 13객실 확보 용이.</td>
+                            </tr>
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900">여행 스타일 추천</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>자유여행 (단독 차량 대절)</b><br>휴양, 골프, 유흥, 해양스포츠</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>단체 패키지 / 단독 투어</b><br>가이드/차량 필수. 대자연(근교)</td>
+                                <td class="px-3 py-4 text-sm text-slate-600"><b>자유여행 (그랩 이용)</b><br>시티투어, 미식, 하롱베이 당일치기</td>
+                            </tr>
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900">예상 예산 (1인)</td>
+                                <td class="px-3 py-4 text-sm font-semibold text-blue-600">140만 ~ 220만 원</td>
+                                <td class="px-3 py-4 text-sm font-semibold text-rose-600">180만 ~ 280만 원</td>
+                                <td class="px-3 py-4 text-sm font-semibold text-teal-600">110만 ~ 170만 원</td>
+                            </tr>
+                            <tr class="bg-slate-50">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-slate-900">최종 평가</td>
+                                <td class="px-3 py-4 text-sm text-slate-800"><b>휴양과 액티비티의 밸런스.</b> 13인이 각자 방을 쓰며 밤낮으로 즐길거리가 가장 많음. (방콕 경유 이동시간 감안 필요)</td>
+                                <td class="px-3 py-4 text-sm text-slate-800"><b>조건과 다소 불일치.</b> 몽골은 도심+수영장 휴양보다는 초원/게르 체험 목적이 강함. 일정상 무리일 수 있음.</td>
+                                <td class="px-3 py-4 text-sm text-slate-800"><b>가성비 최적.</b> 1인 1실 부담을 최소화하며 시티투어와 근교(하롱베이) 관광을 즐기기 좋음.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= SHEET 2: 파타야 ================= -->
+            <section id="sheet2" class="tab-content">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="text-4xl">🌴</span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">파타야 (Pattaya, Thailand) 상세 분석</h2>
+                        <p class="text-slate-500">풍부한 인프라, 훌륭한 수영장을 갖춘 대형 리조트, 13인 단체 자유여행의 성지</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100">
+                        <h3 class="text-lg font-bold text-blue-800 mb-3">🛏️ 숙박 전략 (조건: 13인 1인 1실, 수영장, 도심)</h3>
+                        <p class="text-sm text-slate-700 mb-2"><b>불가 사항:</b> 방 13개짜리 도심 풀빌라는 존재하지 않으며, 4-5룸 풀빌라 3채를 빌리는 것은 동선 분리 및 도심 외곽 위치 문제로 비추천합니다.</p>
+                        <p class="text-sm text-slate-700"><b>해결책:</b> 파타야 시내 중심(해변 도로, 터미널 21 인근)의 수영장이 매우 넓고 시설이 좋은 <b>4.5성급 이상 대형 리조트/호텔에 개별 객실 13개를 예약</b>하는 것이 완벽한 대안입니다. (예: 아마리 파타야, 두짓타니, 그랜드 센터포인트 등)</p>
+                    </div>
+                    <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100">
+                        <h3 class="text-lg font-bold text-blue-800 mb-3">✈️ 항공 및 이동</h3>
+                        <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                            <li><b>항공:</b> 인천/부산 ↔ 방콕 (수완나품 BKK 또는 돈므앙 DMK) 직항 다수. (약 5시간 30분 소요)</li>
+                            <li><b>참고사항:</b> 파타야 우타파오 공항 직항은 정기선이 불안정하여 방콕으로 들어가는 것이 정석입니다.</li>
+                            <li><b>이동:</b> 방콕 공항 ↔ 파타야 호텔 간 <b>13인승 밴 2대 단독 대절</b> (약 1.5~2시간 소요). 편안하게 문앞에서 문앞으로 이동 가능.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">🗺️ 여행 형태 비교 (파타야)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border border-slate-200 p-4 rounded-lg bg-white">
+                            <h4 class="font-semibold text-slate-700 mb-2">✓ 단체 여행 (풀 패키지)</h4>
+                            <p class="text-sm text-slate-600 mb-2">여행사에 13인 단독 행사(인센티브 투어)로 의뢰.</p>
+                            <ul class="text-sm text-slate-600 list-disc pl-5">
+                                <li><b>장점:</b> 전 일정 가이드 동행, 버스 제공, 식사 예약 불필요. 신경 쓸 것이 없음.</li>
+                                <li><b>단점:</b> 패키지 특성상 의무 쇼핑/옵션이 있을 수 있으며, 13명 1인 1실 요구 시 여행사 마진 포함 가격이 크게 뜁니다.</li>
+                            </ul>
+                        </div>
+                        <div class="border border-blue-300 p-4 rounded-lg bg-blue-50/30 shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">추천</div>
+                            <h4 class="font-semibold text-blue-800 mb-2">✓ 자유 여행 (단독 밴 대절)</h4>
+                            <p class="text-sm text-slate-600 mb-2">항공+호텔 직접 예약 후, 현지 이동만 렌터카(기사 포함 밴 2대) 이용.</p>
+                            <ul class="text-sm text-slate-600 list-disc pl-5">
+                                <li><b>장점:</b> 원하는 식당, 일정 자유롭게 조율. 호캉스(수영장) 시간 맘껏 확보 가능.</li>
+                                <li><b>단점:</b> 총무/리더가 예약 및 식당 섭외 등을 직접 챙겨야 하는 수고로움 발생.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">💸 예상 비용 (1인 기준, 4박 5일, 싱글차지 포함)</h3>
+                    <table class="min-w-full text-sm">
+                        <tr class="border-b"><td class="py-2 text-slate-600">항공권 (방콕 왕복)</td><td class="py-2 text-right font-medium">400,000 ~ 600,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">숙박 (4성급 이상, 1인 1실 4박)</td><td class="py-2 text-right font-medium">600,000 ~ 1,000,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">교통 (단독 밴/기사 N빵)</td><td class="py-2 text-right font-medium">50,000 ~ 80,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">식비/투어/여가비</td><td class="py-2 text-right font-medium">350,000 ~ 520,000 원</td></tr>
+                        <tr><td class="py-3 font-bold text-slate-800">총 예상 비용 (Min ~ Max)</td><td class="py-3 text-right font-bold text-blue-600 text-lg">1,400,000 ~ 2,200,000 원</td></tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= SHEET 3: 몽골 ================= -->
+            <section id="sheet3" class="tab-content">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="text-4xl">🐎</span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">몽골 (Mongolia) 상세 분석</h2>
+                        <p class="text-slate-500">이색적인 대자연, 그러나 고객님의 조건(도심+수영장 휴양)과는 가장 거리가 먼 선택지</p>
+                    </div>
+                </div>
+
+                <div class="bg-rose-50 border-l-4 border-rose-500 p-4 mb-6">
+                    <h3 class="text-lg font-bold text-rose-800 mb-1">⚠️ 조건 불일치 경고</h3>
+                    <p class="text-sm text-rose-700">몽골 여행의 핵심은 도심을 벗어나 대자연(테를지, 고비사막 등)에서 게르(전통 숙소)를 체험하는 것입니다. <b>"도심 중심가 + 4성급 이상 + 야외 수영장"</b> 조건을 모두 만족하는 숙소는 울란바토르 시내의 극소수 5성급 비즈니스 호텔(예: 샹그릴라, 실내 수영장 위주)뿐입니다. 이 경우 몽골까지 가서 도심에만 머물게 되어 여행의 의미가 퇴색될 수 있습니다.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h3 class="text-lg font-bold text-slate-800 mb-3">🛏️ 숙박 전략 (어려움)</h3>
+                        <p class="text-sm text-slate-700 mb-2"><b>도심 호텔 체류 시:</b> 울란바토르 시내 4-5성급 호텔 객실 13개 예약 가능. 단, 야외 휴양형 수영장이 아닌 실내 피트니스 수영장 수준.</p>
+                        <p class="text-sm text-slate-700"><b>게르 캠프 이동 시 (몽골 정통):</b> 1인이 게르 1동을 독점하여 13동을 빌리는 것은 비용이 천문학적이거나 예약 자체가 불가한 경우가 많음. (보통 2~4인 1실 사용)</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                        <h3 class="text-lg font-bold text-slate-800 mb-3">✈️ 항공 및 이동</h3>
+                        <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                            <li><b>항공:</b> 인천 ↔ 울란바토르(UBN) 직항. (대한항공, 아시아나, 몽골항공 등. 약 3.5시간 소요)</li>
+                            <li><b>특징:</b> 6월은 몽골 여행 최적기의 시작으로 항공권 가격이 매우 비싸기 시작하는 시기입니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">🗺️ 여행 형태 비교 (몽골)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border border-rose-300 p-4 rounded-lg bg-rose-50/30 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">필수</div>
+                            <h4 class="font-semibold text-rose-800 mb-2">✓ 단체 여행 / 단독 투어사 이용</h4>
+                            <p class="text-sm text-slate-600 mb-2">몽골 전문 투어사를 통한 13인 단독 차량(푸르공 또는 스타렉스 여러대) 및 가이드 대동.</p>
+                            <ul class="text-sm text-slate-600 list-disc pl-5">
+                                <li>몽골은 인프라가 부족하고 길이 험해 가이드와 기사가 없으면 여행이 불가능에 가깝습니다.</li>
+                                <li>일정을 투어사에 전적으로 맡겨야 하며, 비용이 가장 높습니다.</li>
+                            </ul>
+                        </div>
+                        <div class="border border-slate-200 p-4 rounded-lg bg-white opacity-70">
+                            <h4 class="font-semibold text-slate-700 mb-2">✓ 자유 여행 (비추천)</h4>
+                            <p class="text-sm text-slate-600 mb-2">언어 장벽과 대중교통 인프라 부재로 13인 그룹의 순수 자유여행은 권장하지 않습니다. 도심 내 호텔에만 머문다면 가능하나 목적성이 모호해집니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">💸 예상 비용 (1인 기준, 4박 5일, 싱글차지 포함)</h3>
+                    <table class="min-w-full text-sm">
+                        <tr class="border-b"><td class="py-2 text-slate-600">항공권 (6월 성수기 진입)</td><td class="py-2 text-right font-medium">600,000 ~ 900,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">숙박 (도심 4~5성급, 1인 1실 4박)</td><td class="py-2 text-right font-medium">800,000 ~ 1,200,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">현지 투어/가이드/식비</td><td class="py-2 text-right font-medium">400,000 ~ 700,000 원</td></tr>
+                        <tr><td class="py-3 font-bold text-slate-800">총 예상 비용 (Min ~ Max)</td><td class="py-3 text-right font-bold text-rose-600 text-lg">1,800,000 ~ 2,800,000 원</td></tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= SHEET 4: 하노이 ================= -->
+            <section id="sheet4" class="tab-content">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="text-4xl">🍜</span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">하노이 (Hanoi, Vietnam) 상세 분석</h2>
+                        <p class="text-slate-500">가성비 최고의 선택. 1인 1실 비용 부담을 줄이며 훌륭한 인프라를 누릴 수 있는 곳</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-teal-50/50 p-5 rounded-lg border border-teal-100">
+                        <h3 class="text-lg font-bold text-teal-800 mb-3">🛏️ 숙박 전략 (조건: 13인 1인 1실, 수영장, 도심)</h3>
+                        <p class="text-sm text-slate-700 mb-2"><b>가장 현실적이고 저렴한 대안:</b> 베트남은 물가가 저렴하여 4성급 이상 호텔의 <b>싱글차지 부담이 3개국 중 가장 적습니다.</b></p>
+                        <p class="text-sm text-slate-700">도심(호안끼엠 호수 주변 구시가지 또는 서호 지역)에 위치하며, 루프탑 수영장이나 야외 수영장을 보유한 4~5성급 호텔 객실 13개를 예약하는 것이 매우 쉽습니다. (예: 롯데 호텔 하노이, 파노라마 계열 부티크 호텔 등)</p>
+                    </div>
+                    <div class="bg-teal-50/50 p-5 rounded-lg border border-teal-100">
+                        <h3 class="text-lg font-bold text-teal-800 mb-3">✈️ 항공 및 이동</h3>
+                        <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1">
+                            <li><b>항공:</b> 인천/부산 ↔ 하노이 노이바이(HAN) 직항 다수. (약 4.5시간 소요). LCC(저가항공) 취항이 많아 항공권이 가장 저렴함.</li>
+                            <li><b>이동:</b> 공항에서 도심까지 택시/밴으로 약 40분. 시내 이동 시 어플(Grab)을 이용해 4인/7인승 차량을 여러대 나누어 타면 매우 저렴하고 편리함.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">🗺️ 여행 형태 비교 (하노이)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border border-slate-200 p-4 rounded-lg bg-white">
+                            <h4 class="font-semibold text-slate-700 mb-2">✓ 단체 여행 (풀 패키지)</h4>
+                            <p class="text-sm text-slate-600 mb-2">어르신 동반 시 추천. 하롱베이 1박 2일 등 굵직한 동선을 편하게 소화 가능.</p>
+                            <ul class="text-sm text-slate-600 list-disc pl-5">
+                                <li>마찬가지로 13인 1인 1실 조건 시 기본 패키지 가격에서 꽤 많은 금액이 추가됩니다.</li>
+                            </ul>
+                        </div>
+                        <div class="border border-teal-300 p-4 rounded-lg bg-teal-50/30 shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">추천</div>
+                            <h4 class="font-semibold text-teal-800 mb-2">✓ 자유 여행 (현지 데이투어 혼합)</h4>
+                            <p class="text-sm text-slate-600 mb-2">호텔을 거점으로 삼고, 필요할 때만 '하롱베이 당일치기 단독 밴 투어' 등을 현지 여행사(클룩 등)를 통해 예약.</p>
+                            <ul class="text-sm text-slate-600 list-disc pl-5">
+                                <li><b>장점:</b> 가성비가 압도적. 맛집 투어, 마사지 등 개별 일정 소화 용이. 그랩(Grab) 시스템이 완벽히 구축되어 13명 이동도 문제 없음.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3">💸 예상 비용 (1인 기준, 4박 5일, 싱글차지 포함)</h3>
+                    <table class="min-w-full text-sm">
+                        <tr class="border-b"><td class="py-2 text-slate-600">항공권 (직항)</td><td class="py-2 text-right font-medium">300,000 ~ 450,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">숙박 (도심 4~5성급, 1인 1실 4박)</td><td class="py-2 text-right font-medium">400,000 ~ 700,000 원</td></tr>
+                        <tr class="border-b"><td class="py-2 text-slate-600">교통/식비/마사지/투어</td><td class="py-2 text-right font-medium">400,000 ~ 550,000 원</td></tr>
+                        <tr><td class="py-3 font-bold text-slate-800">총 예상 비용 (Min ~ Max)</td><td class="py-3 text-right font-bold text-teal-600 text-lg">1,100,000 ~ 1,700,000 원</td></tr>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Data for the Chart
+        const costData = {
+            labels: ['🌴 파타야', '🐎 몽골', '🍜 하노이'],
+            datasets: [
+                {
+                    label: '최소 예상비용 (만원)',
+                    data: [140, 180, 110],
+                    backgroundColor: 'rgba(96, 165, 250, 0.7)', // Tailwind blue-400
+                    borderColor: 'rgba(59, 130, 246, 1)',   // Tailwind blue-500
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: '최대 예상비용 (만원)',
+                    data: [220, 280, 170],
+                    backgroundColor: 'rgba(148, 163, 184, 0.7)', // Tailwind slate-400
+                    borderColor: 'rgba(100, 116, 139, 1)',  // Tailwind slate-500
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        };
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Reset all buttons styling
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
+                el.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+            });
+
+            // Show selected content
+            document.getElementById(tabId).classList.add('active');
+
+            // Style selected button
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+            activeBtn.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
+
+            // Render chart if sheet1 is clicked and chart doesn't exist
+            if (tabId === 'sheet1' && !window.myChart) {
+                renderChart();
+            }
+        }
+
+        // Chart Initialization
+        function renderChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: costData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Ensures it fits the CSS container height
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { family: "'Noto Sans KR', sans-serif" } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' 만원';
+                                }
+                            },
+                            bodyFont: { family: "'Noto Sans KR', sans-serif" },
+                            titleFont: { family: "'Noto Sans KR', sans-serif" }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '금액 (만원)' },
+                            ticks: { font: { family: "'Noto Sans KR', sans-serif" } }
+                        },
+                        x: {
+                            ticks: { font: { family: "'Noto Sans KR', sans-serif" } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize first tab and chart on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart();
+        });
+    </script>
+</body>
+</html>
